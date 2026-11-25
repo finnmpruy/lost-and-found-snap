@@ -762,7 +762,7 @@ def render_main_app():
                         deskripsi=deskripsi_ciri or "Ciri-ciri barang akan ditampilkan otomatis pada kartu.",
                         lokasi=lokasi_terakhir or "Lingkungan Telkom University",
                     )
-                    st.image(placeholder_preview, caption="Preview Kartu Placeholder Otomatis (1:1)", width=270)
+                    st.image(placeholder_preview, width=270)
 
         if submit_btn:
             if not (nama_pelapor and nim_pelapor and nama_barang and lokasi_terakhir and deskripsi_ciri):
