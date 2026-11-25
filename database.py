@@ -55,6 +55,7 @@ def init_db():
             is_watermarked INTEGER DEFAULT 1,
             hash_sha256 TEXT UNIQUE NOT NULL,
             created_at TEXT NOT NULL,
+            updated_at TEXT,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     """)
@@ -69,6 +70,11 @@ def init_db():
         "INSERT OR IGNORE INTO users (nama, nim, kelas, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?, ?)",
         default_users,
     )
+
+    # Database lama belum menyimpan waktu perubahan status laporan.
+    columns = {row["name"] for row in c.execute("PRAGMA table_info(laporan)")}
+    if "updated_at" not in columns:
+        c.execute("ALTER TABLE laporan ADD COLUMN updated_at TEXT")
 
     c.execute("UPDATE laporan SET jenis_laporan = 'Ditemukan' WHERE status_barang = 'Selesai'")
 
