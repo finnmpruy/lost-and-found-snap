@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Database lokal (tiap teman auto-generate sendiri saat run)
+*.db
+*.sqlite
+*.sqlite3
+
+# Hasil upload lokal
+uploads/processed/*
+!uploads/processed/.gitkeep
+assets/uploads/*
+!assets/uploads/.gitkeep
+
+.env
+.vscode/
