@@ -1,8 +1,7 @@
-import io
 import time
 import streamlit as st
 import pandas as pd
-from PIL import Image
+from PIL import Image, ImageOps
 import extra_streamlit_components as stx
 from streamlit_cropper import st_cropper
 from datetime import datetime, timedelta
@@ -16,7 +15,6 @@ from database import (
     update_status_barang,
 )
 from module.multimedia_engine import (
-    crop_center_square,
     process_uploaded_image,
     generate_placeholder_card,
     generate_sha256_hash,
@@ -44,6 +42,12 @@ st.markdown(
     html, body, [class*="css"] {
         font-family: 'Plus Jakarta Sans', sans-serif !important;
         color: #0F172A;
+    }
+
+    .st-key-report_photo_preview img {
+        max-height: 65vh;
+        height: auto;
+        object-fit: contain;
     }
 
     #MainMenu, footer, header {visibility: hidden;}
@@ -293,7 +297,7 @@ def render_auth_page():
                         Dilengkapi pemrosesan citra otomatis, sensor privasi KTM, dan verifikasi integritas SHA-256.
                     </p>
                     <div class="auth-feature-item">
-                        🖼️ <b>Auto-Crop 1:1 & Kompresi Cerdas</b> — Mengubah foto mentah menjadi WebP/JPEG ringan (< 150 KB).
+                        🖼️ <b>Kompresi Foto dengan Rasio Asli</b> — Mengubah foto mentah menjadi WebP/JPEG ringan (< 150 KB).
                     </div>
                     <div class="auth-feature-item">
                         🛡️ <b>Privacy Blur & Watermark</b> — Sensor manual data sensitif NIM/NIK dan proteksi watermark kampus.
@@ -701,7 +705,9 @@ def render_main_app():
 
                 if uploaded_file and enable_manual_blur:
                     st.caption("🖱️ Tarik & geser sudut kotak merah di bawah ini untuk menutupi area sensitif:")
-                    base_select_img = Image.open(io.BytesIO(raw_bytes)).convert("RGB")
+                    uploaded_file.seek(0)
+                    with Image.open(uploaded_file) as source:
+                        base_select_img = ImageOps.exif_transpose(source).convert("RGB")
                     base_select_img.thumbnail((360, 360), Image.Resampling.LANCZOS)
                     sel_w, sel_h = base_select_img.size
 
@@ -737,11 +743,12 @@ def render_main_app():
                         enable_watermark=enable_wm,
                         target_format=target_fmt,
                     )
-                    st.image(
-                        processed["preview_image"],
-                        caption=f"Hasil Akhir ({processed['final_dim']} px • Rasio Asli)",
-                        use_container_width=True,
-                    )
+                    with st.container(key="report_photo_preview"):
+                        st.image(
+                            processed["preview_image"],
+                            caption=f"Hasil Akhir ({processed['final_dim']} px • Rasio Asli)",
+                            use_container_width=True,
+                        )
 
                     m1, m2, m3 = st.columns(3)
                     m1.metric("Ukuran asli", f"{processed['original_size_kb']} KB")

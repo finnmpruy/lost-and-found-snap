@@ -2,7 +2,7 @@ import io
 import os
 import hashlib
 from datetime import datetime
-from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageFilter
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance, ImageFilter, ImageOps
 
 UPLOAD_DIR = os.path.join("uploads", "processed")
 POSTER_DIR = os.path.join("uploads", "posters")
@@ -42,14 +42,9 @@ def generate_sha256_hash(seed_text: str, image_bytes: bytes = b"") -> str:
     return hasher.hexdigest()
 
 
-def crop_center_square(img: Image.Image, crop_ratio: float = 0.78) -> Image.Image:
- 
-    width, height = img.size
-    base_edge = min(width, height)
-    new_edge = max(200, int(base_edge * crop_ratio))
-    left = (width - new_edge) // 2
-    top = (height - new_edge) // 2
-    return img.crop((left, top, left + new_edge, top + new_edge))
+def open_uploaded_photo(data: bytes) -> Image.Image:
+    with Image.open(io.BytesIO(data)) as source:
+        return ImageOps.exif_transpose(source).convert("RGB")
 
 
 def apply_privacy_blur(img: Image.Image, blur_boxes: list) -> Image.Image:
@@ -106,7 +101,7 @@ def process_uploaded_image(
     target_format: str = "WebP",
 ) -> dict:
     original_size_kb = round(len(uploaded_bytes) / 1024, 1)
-    img = Image.open(io.BytesIO(uploaded_bytes)).convert("RGB")
+    img = open_uploaded_photo(uploaded_bytes)
     orig_w, orig_h = img.size
 
     # 1. Pertahankan rasio & resolusi asli (hanya batasi sisi terpanjang max 1280px jika terlalu raksasa)
