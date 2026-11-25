@@ -690,7 +690,7 @@ def render_main_app():
         with col_media:
             with st.container(border=True):
                 st.markdown("#### 📸 Pengolahan Citra & Keamanan (Opsional)")
-                uploaded_file = st.file_uploader("Pilih foto (JPG, atau WebP)", type=["jpg", "jpeg", "webp"])
+                uploaded_file = st.file_uploader("Pilih foto (JPG, PNG, atau WebP)", type=["jpg", "jpeg", "png", "webp"])
 
                 b_col, c_col = st.columns(2)
                 with b_col:
